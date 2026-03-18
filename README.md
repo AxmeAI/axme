@@ -1,200 +1,195 @@
 # AXME
 
-**Durable execution infrastructure for long-running intents.**
+**Durable execution where agents, services, and humans coordinate as equals.**
 
-AXME is a coordination layer for async operations that need delivery guarantees, retry logic, human-in-the-loop steps, and observable lifecycle — across services, agents, and time.
+Submit once, track lifecycle, complete later. Replace polling, webhook glue, and Temporal complexity with one protocol for all your workflows — AI-driven or not.
 
-> **Alpha** · API surface is stabilizing. Not recommended for production workloads yet.  
-> Alpha access: [cloud.axme.ai](https://cloud.axme.ai/alpha) · Questions: [hello@axme.ai](mailto:hello@axme.ai)
+[![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha)
+
+> **Alpha** — API surface is stabilizing. Not recommended for production workloads yet.
+> [Request alpha access](https://cloud.axme.ai/alpha) · [hello@axme.ai](mailto:hello@axme.ai)
 
 ---
 
 ## What Is AXME?
 
-AXME runs **intents** — durable actions that may take minutes, hours, or longer to complete.
+AXME is a coordination layer for operations that take minutes, hours, or days to complete. An **intent** carries a payload, a delivery target, and a lifecycle policy. The platform drives it to a terminal state through retries, timeouts, reminders, and human approval steps — without external orchestration or polling.
 
-An intent carries a payload, a delivery target, and a lifecycle policy. The platform guarantees it reaches a terminal state — through retries, timeouts, reminders, and human approval steps — without requiring external orchestration ticks.
+AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an MCP replacement. It is a protocol-based runtime where AI agents, backend services, and human operators participate as equal actors.
+
+---
+
+## Quick Start
+
+```bash
+# Install the CLI
+curl -fsSL https://get.axme.ai | sh
+
+# Authenticate
+axme login
+
+# Run a built-in example: human approval via CLI
+axme examples run human/cli
+```
+
+The `human/cli` example deploys a readiness-checker agent and pauses for human approval. You approve or reject directly from the terminal with `axme tasks approve <task_id>`.
+
+---
+
+## Connect Your Agents
+
+An agent listens for intents, processes them, and resumes with a result:
 
 ```python
-# Submit an intent. The platform drives it to completion.
-intent = client.create_intent({
-    "intent_type": "order.fulfillment.v1",
-    "payload": {"order_id": "ord_123"},
-    "owner_agent": "agent://fulfillment-service",
-})
+from axme import AxmeClient, AxmeClientConfig
 
-# Wait for resolution — retries and approvals happen server-side
-result = client.wait_for(intent["intent_id"], terminal_states={"RESOLVED", "CANCELLED"})
-print(result["status"])  # RESOLVED
+client = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
+
+for delivery in client.listen("agent://myorg/myworkspace/my-agent"):
+    intent = client.get_intent(delivery["intent_id"])
+    result = process(intent["payload"])
+    client.resume_intent(delivery["intent_id"], result)
 ```
 
 ---
 
-## Get Started
+## ScenarioBundle
 
-1. **Get alpha access** → [cloud.axme.ai/alpha](https://cloud.axme.ai/alpha)
-2. **Pick your SDK** and run the quickstart
-3. **Explore examples** for more complex scenarios
+A ScenarioBundle is a JSON file that declares agents, human roles, workflow steps, and an intent — everything needed to run a coordination scenario:
 
-### Quickstart (Python)
+```json
+{
+  "scenario_id": "human.cli.v1",
+  "agents": [
+    {
+      "role": "checker",
+      "address": "deploy-readiness-checker",
+      "delivery_mode": "stream",
+      "create_if_missing": true
+    }
+  ],
+  "humans": [
+    { "role": "operator", "display_name": "Operations Team" }
+  ],
+  "workflow": {
+    "steps": [
+      { "step_id": "readiness_check", "assigned_to": "checker" },
+      { "step_id": "ops_approval", "assigned_to": "operator", "requires_approval": true }
+    ]
+  },
+  "intent": {
+    "type": "intent.deployment.approval.v1",
+    "payload": { "service": "api-gateway", "version": "3.2.1" }
+  }
+}
+```
+
+Apply it:
 
 ```bash
-pip install axme
-export AXME_API_KEY="axme_sa_..."
-python -c "
-from axme import AxmeClient, AxmeClientConfig
-client = AxmeClient(AxmeClientConfig(api_key='${AXME_API_KEY}'))
-print(client.health())
-"
+axme scenarios apply scenario.json --watch
+```
+
+---
+
+## Delivery Bindings
+
+How intents reach agents and services:
+
+| Binding | Transport | Use Case |
+|---|---|---|
+| `stream` | SSE (server-sent events) | Real-time agent listeners |
+| `poll` | GET polling | Serverless / cron-based consumers |
+| `http` | Webhook POST | Backend services with an HTTP endpoint |
+| `inbox` | Human inbox | Human-in-the-loop tasks (approve, reject, respond) |
+| `internal` | Platform-internal | Built-in platform steps (reminders, escalations) |
+
+---
+
+## Human-in-the-Loop
+
+Three paths for human participation:
+
+| Path | How It Works |
+|---|---|
+| **CLI** | `axme tasks list` → `axme tasks approve <task_id>` |
+| **Email** | Magic link sent to the assigned human; click to approve/reject |
+| **Form** | Custom form submitted via API or embedded UI |
+
+Human steps pause the intent lifecycle. The platform handles reminders and timeouts automatically.
+
+---
+
+## Intent Lifecycle
+
+```
+CREATED → SUBMITTED → DELIVERED → ACKNOWLEDGED → IN_PROGRESS → WAITING → COMPLETED
+                                                                       ↘ FAILED
+                                                                       ↘ CANCELLED
+                                                                       ↘ TIMED_OUT
+```
+
+---
+
+## Repository Map
+
+| Repository | Description |
+|---|---|
+| **[axme](https://github.com/AxmeAI/axme)** | This repo — project overview and entry point |
+| **[axme-docs](https://github.com/AxmeAI/axme-docs)** | API reference, integration guides, protocol docs |
+| **[axme-examples](https://github.com/AxmeAI/axme-examples)** | Runnable examples across all SDKs |
+| **[axme-cli](https://github.com/AxmeAI/axme-cli)** | CLI — manage intents, agents, scenarios, tasks |
+| **[axp-spec](https://github.com/AxmeAI/axp-spec)** | AXP protocol specification |
+| **[axme-conformance](https://github.com/AxmeAI/axme-conformance)** | Conformance test suite for spec-runtime-SDK parity |
+
+---
+
+## SDKs
+
+All SDKs implement the same AXP protocol surface. All are currently at **v0.1.2 (Alpha)**.
+
+| SDK | Package | Install |
+|---|---|---|
+| **[Python](https://github.com/AxmeAI/axme-sdk-python)** | `axme` | `pip install axme` |
+| **[TypeScript](https://github.com/AxmeAI/axme-sdk-typescript)** | `@axme/axme` | `npm install @axme/axme` |
+| **[Go](https://github.com/AxmeAI/axme-sdk-go)** | `github.com/AxmeAI/axme-sdk-go/axme` | `go get github.com/AxmeAI/axme-sdk-go@latest` |
+| **[Java](https://github.com/AxmeAI/axme-sdk-java)** | `ai.axme:axme-sdk` | Maven Central |
+| **[.NET](https://github.com/AxmeAI/axme-sdk-dotnet)** | `Axme.Sdk` | `dotnet add package Axme.Sdk` |
+
+### CLI
+
+```bash
+curl -fsSL https://get.axme.ai | sh
 ```
 
 ---
 
 ## AXP — the Intent Protocol
 
-At the core of AXME is **AXP** — an open protocol for durable intent execution. AXP defines the envelope, lifecycle rules, and contract model. It can be implemented independently.
+AXP is the open protocol behind AXME. It defines the intent envelope, lifecycle states, delivery semantics, and contract model. AXP can be implemented independently of AXME Cloud — the spec, SDKs, and conformance suite are all public.
 
-The open components (spec, SDKs, conformance, CLI) are all public. AXME Cloud is the managed runtime.
-
----
-
-## Repository Map
-
-### Start here
-
-| Repository | What it is |
-|---|---|
-| **[axme](https://github.com/AxmeAI/axme)** | You are here — entry point and overview |
-| **[axme-docs](https://github.com/AxmeAI/axme-docs)** | Full API reference, integration guides, protocol docs, diagrams |
-| **[axme-spec](https://github.com/AxmeAI/axme-spec)** | Canonical protocol and public API schema contracts |
-| **[axme-examples](https://github.com/AxmeAI/axme-examples)** | Runnable examples: cloud scenarios, protocol-only, advanced flows |
-
-### SDKs
-
-| Repository | Language | Status |
-|---|---|---|
-| **[axme-sdk-python](https://github.com/AxmeAI/axme-sdk-python)** | Python | GA |
-| **[axme-sdk-typescript](https://github.com/AxmeAI/axme-sdk-typescript)** | TypeScript / Node.js | GA |
-| **[axme-sdk-go](https://github.com/AxmeAI/axme-sdk-go)** | Go | Beta |
-| **[axme-sdk-java](https://github.com/AxmeAI/axme-sdk-java)** | Java | Beta |
-| **[axme-sdk-dotnet](https://github.com/AxmeAI/axme-sdk-dotnet)** | .NET / C# | Beta |
-
-### Tooling
-
-| Repository | What it is |
-|---|---|
-| **[axme-cli](https://github.com/AxmeAI/axme-cli)** | Go CLI — manage intents, contexts, agents, and service accounts from the terminal |
-| **[axme-conformance](https://github.com/AxmeAI/axme-conformance)** | Contract test suite — validates spec-runtime-SDK parity |
-| **[axme-reference-clients](https://github.com/AxmeAI/axme-reference-clients)** | Reference client implementations (planned) |
+Protocol spec: [axp-spec](https://github.com/AxmeAI/axp-spec)
 
 ---
 
-## Core Concepts
+## Agent Addressing
 
-### Intent lifecycle
+Agents are addressed with a URI scheme:
 
 ```
-PENDING → PROCESSING → WAITING_* → DELIVERED → RESOLVED
-                    ↘ CANCELLED / EXPIRED
+agent://org/workspace/name
 ```
 
-An intent moves through states autonomously. `WAITING_HUMAN` pauses for an approval step. `WAITING_TIME` waits for a scheduled wakeup. The platform handles retries, timeouts, and reminders — no external polling required.
-
-### Auth model
-
-Every API call uses two optional credentials:
-
-| Header | Purpose |
-|---|---|
-| `x-api-key` | Service/workspace API key — identifies the calling service |
-| `Authorization: Bearer <token>` | Actor token — identifies the human or agent acting |
-
-Most operations need only `x-api-key`. Multi-actor flows (approvals, delegated operations, org admin) require both.
-
-### Key API families
-
-| Family | What it covers |
-|---|---|
-| **Intents** | Create, get, list, cancel, resume, update controls |
-| **Inbox / Approvals** | Human-in-the-loop steps, thread management, decisions |
-| **Webhooks** | Subscribe to lifecycle events, delivery management |
-| **Users / Registry** | Identity registration, nick management, agent resolution |
-| **Enterprise** | Orgs, workspaces, members, service accounts, quotas |
-| **MCP** | Model Context Protocol tool adapter for AI assistants |
-
-Full API reference: [axme-docs](https://github.com/AxmeAI/axme-docs)
-
----
-
-## Examples
-
-### Basic intent (API key only)
-
-```typescript
-import { AxmeClient } from "@axme/axme";
-
-const client = new AxmeClient({ apiKey: process.env.AXME_API_KEY });
-
-const intent = await client.createIntent({
-  intent_type: "report.generation.v1",
-  payload: { report_id: "rpt_001", format: "pdf" },
-  owner_agent: "agent://report-service",
-});
-
-console.log(intent.intent_id, intent.status); // ... PENDING
-```
-
-### Multi-actor approval flow (API key + actor token)
-
-```python
-from axme import AxmeClient, AxmeClientConfig
-
-# Service submits intent that requires human approval
-service = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
-intent = service.create_intent({
-    "intent_type": "contract.sign.v1",
-    "payload": {"contract_id": "ctr_001"},
-    "owner_agent": "agent://legal-service",
-})
-
-# Human approves via their actor token
-approver = AxmeClient(AxmeClientConfig(
-    api_key="axme_sa_...",
-    actor_token="user_jwt_token",  # identifies the approving human
-))
-pending = approver.list_inbox(owner_agent="agent://legal/approver")
-for item in pending.get("items", []):
-    approver.approve_inbox_thread(item["thread_id"], {"note": "Approved"}, owner_agent="agent://legal/approver")
-```
-
-More in [axme-examples](https://github.com/AxmeAI/axme-examples).
-
----
-
-## Install
-
-```bash
-# Python
-pip install axme
-
-# TypeScript
-npm install @axme/axme
-
-# Go
-go get github.com/AxmeAI/axme-sdk-go@latest
-
-# CLI
-go install github.com/AxmeAI/axme-cli/cmd/axme@latest
-```
+Example: `agent://acme/production/deploy-readiness-checker`
 
 ---
 
 ## Links
 
 - **Cloud platform**: [cloud.axme.ai](https://cloud.axme.ai)
-- **Alpha signup**: [cloud.axme.ai/alpha](https://cloud.axme.ai/alpha)
+- **Alpha access**: [cloud.axme.ai/alpha](https://cloud.axme.ai/alpha)
 - **API docs**: [axme-docs](https://github.com/AxmeAI/axme-docs)
-- **Protocol spec**: [axme-spec](https://github.com/AxmeAI/axme-spec)
+- **Protocol spec**: [axp-spec](https://github.com/AxmeAI/axp-spec)
 - **Contact**: [hello@axme.ai](mailto:hello@axme.ai)
 - **Security**: [SECURITY.md](SECURITY.md)
 
@@ -204,7 +199,7 @@ go install github.com/AxmeAI/axme-cli/cmd/axme@latest
 
 This repository is the entry point — not the implementation. To contribute:
 
-- **Protocol / schemas** → [axme-spec](https://github.com/AxmeAI/axme-spec)
+- **Protocol / schemas** → [axp-spec](https://github.com/AxmeAI/axp-spec)
 - **Documentation** → [axme-docs](https://github.com/AxmeAI/axme-docs)
 - **SDK improvements** → respective SDK repository
 - **Examples** → [axme-examples](https://github.com/AxmeAI/axme-examples)
