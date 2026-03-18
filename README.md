@@ -7,7 +7,7 @@ Submit once, track lifecycle, complete later. Replace polling, webhook glue, and
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha)
 
 > **Alpha** — API surface is stabilizing. Not recommended for production workloads yet.
-> [Request alpha access](https://cloud.axme.ai/alpha) · [hello@axme.ai](mailto:hello@axme.ai)
+> **Alpha** — install CLI, log in, run your first example in under 5 minutes. [Quick Start](https://cloud.axme.ai/alpha/cli) · [hello@axme.ai](mailto:hello@axme.ai)
 
 ---
 
@@ -23,7 +23,7 @@ AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an
 
 ```bash
 # Install the CLI
-curl -fsSL https://get.axme.ai | sh
+curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
 
 # Authenticate
 axme login
@@ -159,7 +159,7 @@ All SDKs implement the same AXP protocol surface. All are currently at **v0.1.2 
 ### CLI
 
 ```bash
-curl -fsSL https://get.axme.ai | sh
+curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
 ```
 
 ---
@@ -187,7 +187,7 @@ Example: `agent://acme/production/deploy-readiness-checker`
 ## Links
 
 - **Cloud platform**: [cloud.axme.ai](https://cloud.axme.ai)
-- **Alpha access**: [cloud.axme.ai/alpha](https://cloud.axme.ai/alpha)
+- **Quick Start**: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
 - **API docs**: [axme-docs](https://github.com/AxmeAI/axme-docs)
 - **Protocol spec**: [axp-spec](https://github.com/AxmeAI/axp-spec)
 - **Contact**: [hello@axme.ai](mailto:hello@axme.ai)
