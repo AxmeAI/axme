@@ -4,10 +4,10 @@
 
 Submit once, track lifecycle, complete later. Replace polling, webhook glue, and Temporal complexity with one protocol for all your workflows — AI-driven or not.
 
-[![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha)
+[![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha/cli)
 
-> **Alpha** — API surface is stabilizing. Not recommended for production workloads yet.
-> **Alpha** — install CLI, log in, run your first example in under 5 minutes. [Quick Start](https://cloud.axme.ai/alpha/cli) · [hello@axme.ai](mailto:hello@axme.ai)
+> **Alpha** — install CLI, log in, run your first example in under 5 minutes.
+> [Quick Start](https://cloud.axme.ai/alpha/cli) · [cloud.axme.ai](https://cloud.axme.ai) · [hello@axme.ai](mailto:hello@axme.ai)
 
 ---
 
