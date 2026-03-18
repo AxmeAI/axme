@@ -23,7 +23,7 @@ AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an
 
 ```bash
 # Install the CLI
-curl -fsSL https://get.axme.ai | sh
+curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
 
 # Authenticate
 axme login
@@ -159,7 +159,7 @@ All SDKs implement the same AXP protocol surface. All are currently at **v0.1.2 
 ### CLI
 
 ```bash
-curl -fsSL https://get.axme.ai | sh
+curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
 ```
 
 ---
