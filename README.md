@@ -92,6 +92,26 @@ axme scenarios apply scenario.json --watch
 
 ---
 
+## MCP — AI Assistant Integration
+
+AXME exposes a full MCP (Model Context Protocol) server at `mcp.cloud.axme.ai`. AI assistants (Claude, ChatGPT, Gemini) can manage the entire platform through 48 tools — the same operations available in the CLI.
+
+```
+POST https://mcp.cloud.axme.ai/mcp
+Authorization: Bearer <account_session_token>
+
+{"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+ "params": {"name": "axme.intents_send", "arguments": {
+   "to_agent": "agent://myorg/production/my-agent",
+   "intent_type": "task.process.v1",
+   "payload": {"data": "..."}
+ }}}
+```
+
+Available tool groups: status, agents, intents, tasks, organizations, workspaces, members, quota, scenarios, sessions. See [connector setup guides](https://github.com/AxmeAI/axme-docs/tree/main/docs/connectors) for Claude, ChatGPT, and Gemini integration.
+
+---
+
 ## Delivery Bindings
 
 How intents reach agents and services:
@@ -136,7 +156,7 @@ CREATED → SUBMITTED → DELIVERED → ACKNOWLEDGED → IN_PROGRESS → WAITING
 | Repository | Description |
 |---|---|
 | **[axme](https://github.com/AxmeAI/axme)** | This repo — project overview and entry point |
-| **[axme-docs](https://github.com/AxmeAI/axme-docs)** | API reference, integration guides, protocol docs |
+| **[axme-docs](https://github.com/AxmeAI/axme-docs)** | API reference, integration guides, MCP connector setup |
 | **[axme-examples](https://github.com/AxmeAI/axme-examples)** | Runnable examples across all SDKs |
 | **[axme-cli](https://github.com/AxmeAI/axme-cli)** | CLI — manage intents, agents, scenarios, tasks |
 | **[axp-spec](https://github.com/AxmeAI/axp-spec)** | AXP protocol specification |
