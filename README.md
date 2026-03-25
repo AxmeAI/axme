@@ -121,11 +121,14 @@ No polling. No webhooks. No Redis. No glue code. The platform handles retries, t
 
 ## How AXME Compares
 
-| Approach | Lines of code | What you operate |
-|---|---|---|
-| DIY (webhooks + polling + Redis) | ~200 | Everything: retry logic, state machine, timeout jobs, notification service |
-| Temporal | ~80 | Temporal server cluster, workers, determinism constraints |
-| AXME | 4 | Nothing - managed service with protocol-level guarantees |
+| | DIY (webhooks + polling) | Temporal | AXME |
+|---|---|---|---|
+| Polling | Yes | No | No |
+| Webhooks | Yes | No | No |
+| Human approvals | Custom build | Possible (heavy) | Built-in (8 task types) |
+| Workflow code | Manual state machine | Required (deterministic) | Not required |
+| Setup | Low (but fragile) | High (cluster + workers) | None (managed service) |
+| Lines of code | ~200 | ~80 | 4 |
 
 ---
 
