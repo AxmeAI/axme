@@ -82,7 +82,7 @@ No polling. No webhooks. No Redis. No glue code. The platform handles retries, t
 |---|---|---|
 | DIY (webhooks + polling + Redis) | ~200 | Everything: retry logic, state machine, timeout jobs, notification service |
 | Temporal | ~80 | Temporal server cluster, workers, determinism constraints |
-| AXME | ~15 | Nothing - managed service with protocol-level guarantees |
+| AXME | ~3-5 | Nothing - managed service with protocol-level guarantees |
 
 ---
 
