@@ -82,7 +82,7 @@ No polling. No webhooks. No Redis. No glue code. The platform handles retries, t
 |---|---|---|
 | DIY (webhooks + polling + Redis) | ~200 | Everything: retry logic, state machine, timeout jobs, notification service |
 | Temporal | ~80 | Temporal server cluster, workers, determinism constraints |
-| AXME | ~15 | Nothing - managed service with protocol-level guarantees |
+| AXME | 4 | Nothing - managed service with protocol-level guarantees |
 
 ---
 
@@ -207,22 +207,21 @@ How intents reach agents and services:
 ## Execution Model
 
 ```
-Initiator (SDK/CLI)                              Handler (your agent)
-       |                                                |
-       |  POST /v1/intents                              |
-       |  ----------------------->  AXME Cloud           |
-       |                           (Gateway + Registry)  |
-       |                                |                |
-       |                                |--- stream (SSE push)
-       |                                |--- poll (agent pulls)
-       |                                |--- http (webhook + HMAC)
-       |                                |--- inbox (human task queue)
-       |                                |--- internal (built-in runtime)
-       |                                |                |
-       |  GET /v1/intents/{id}          |                |
-       |  SSE /v1/intents/{id}/events   |                |
-       |  <-----------------------      |  <-------------|
-       |     lifecycle events           |    resume/result
+Initiator                        AXME Cloud                      Handler
+(SDK/CLI)                    (Gateway + Registry)             (your agent)
+    |                               |                              |
+    |   POST /v1/intents            |                              |
+    |------------------------------>|                              |
+    |                               |------- stream (SSE push) --->|
+    |                               |------- poll (agent pulls) -->|
+    |                               |------- http (webhook+HMAC) ->|
+    |                               |------- inbox (human queue) ->|
+    |                               |------- internal (built-in)   |
+    |                               |                              |
+    |   GET /v1/intents/{id}        |                              |
+    |   SSE /v1/intents/{id}/events |          resume/result       |
+    |<------------------------------|<-----------------------------|
+    |        lifecycle events       |                              |
 ```
 
 ---
