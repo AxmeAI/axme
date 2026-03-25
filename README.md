@@ -19,6 +19,49 @@ AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an
 
 ---
 
+## Before and After
+
+**Without AXME** - polling, webhooks, Redis, and glue code:
+
+```python
+import requests, time, redis
+
+# 1. Submit the job
+resp = requests.post("https://api.vendor.com/generate", json=payload)
+job_id = resp.json()["job_id"]
+
+# 2. Poll until done (or timeout after 10 min)
+for _ in range(120):
+    status = requests.get(f"https://api.vendor.com/jobs/{job_id}").json()
+    if status["state"] in ("completed", "failed"):
+        break
+    time.sleep(5)
+
+# 3. Webhook handler for async callbacks
+@app.post("/webhooks/vendor")
+def handle_webhook(req):
+    r = redis.Redis()
+    r.set(f"job:{req.json['job_id']}", req.json["result"])
+    return {"ok": True}
+
+# 4. Fetch result from Redis
+result = redis.Redis().get(f"job:{job_id}")
+```
+
+**With AXME** - submit once, track lifecycle, done:
+
+```python
+from axme import AxmeClient, AxmeClientConfig
+
+client = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
+intent = client.send_intent("agent://myorg/prod/generator", payload)
+result = client.wait_for(intent["id"])  # retries, timeouts, delivery - all handled
+```
+
+No polling. No webhooks. No Redis. No glue code. The platform handles retries, timeouts, delivery guarantees, and human approval steps for you.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -139,6 +182,32 @@ Three paths for human participation:
 
 Human steps pause the intent lifecycle. The platform handles reminders and timeouts automatically.
 
+### Human Task Types
+
+| Type | Purpose |
+|---|---|
+| `approval` | Binary yes/no decision gate (e.g., deploy go/no-go) |
+| `form` | Structured data collection with custom fields |
+| `review` | Content or artifact review with comments and verdict |
+| `override` | Manual override of an automated decision or threshold |
+| `confirmation` | Acknowledge receipt or verify a fact before proceeding |
+| `assignment` | Route a work item to a specific person or team |
+| `clarification` | Request missing information needed to continue |
+| `manual_action` | Perform a physical or out-of-band action (e.g., flip a switch, sign a document) |
+
+### Internal Runtime Steps
+
+These steps run inside the platform - no agent or human action needed:
+
+| Step | What It Does |
+|---|---|
+| `human_approval` | Pauses the intent and waits for a human decision before continuing |
+| `timeout` | Fails or escalates the intent if a step exceeds its deadline |
+| `reminder` | Sends a nudge to the assigned human after a configurable delay |
+| `delay` | Pauses execution for a fixed duration before advancing to the next step |
+| `escalation` | Re-routes a stalled task to a higher-priority handler or team |
+| `notification` | Fires an event or message (email, Slack, webhook) without blocking the flow |
+
 ---
 
 ## Intent Lifecycle
@@ -152,22 +221,28 @@ CREATED → SUBMITTED → DELIVERED → ACKNOWLEDGED → IN_PROGRESS → WAITING
 
 ---
 
-## Repository Map
+<details>
+<summary><h2>Repository Map</h2></summary>
 
 | Repository | Description |
 |---|---|
-| **[axme](https://github.com/AxmeAI/axme)** | This repo — project overview and entry point |
+| **[axme](https://github.com/AxmeAI/axme)** | This repo - project overview and entry point |
 | **[axme-docs](https://github.com/AxmeAI/axme-docs)** | API reference, integration guides, MCP connector setup |
 | **[axme-examples](https://github.com/AxmeAI/axme-examples)** | Runnable examples across all SDKs |
-| **[axme-cli](https://github.com/AxmeAI/axme-cli)** | CLI — manage intents, agents, scenarios, tasks |
+| **[axme-cli](https://github.com/AxmeAI/axme-cli)** | CLI - manage intents, agents, scenarios, tasks |
 | **[axme-spec](https://github.com/AxmeAI/axme-spec)** | AXP protocol specification |
 | **[axme-conformance](https://github.com/AxmeAI/axme-conformance)** | Conformance test suite for spec-runtime-SDK parity |
+
+</details>
 
 ---
 
 ## SDKs
 
 All SDKs implement the same AXP protocol surface. All are currently at **v0.1.2 (Alpha)**.
+
+<details>
+<summary>SDK install commands (Python, TypeScript, Go, Java, .NET)</summary>
 
 | SDK | Package | Install |
 |---|---|---|
@@ -183,6 +258,8 @@ All SDKs implement the same AXP protocol surface. All are currently at **v0.1.2 
 curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
 # Open a new terminal, or run the "source" command shown by the installer
 ```
+
+</details>
 
 ---
 
@@ -217,14 +294,17 @@ Example: `agent://acme/production/deploy-readiness-checker`
 
 ---
 
-## Contributing
+<details>
+<summary><h2>Contributing</h2></summary>
 
-This repository is the entry point — not the implementation. To contribute:
+This repository is the entry point - not the implementation. To contribute:
 
-- **Protocol / schemas** → [axme-spec](https://github.com/AxmeAI/axme-spec)
-- **Documentation** → [axme-docs](https://github.com/AxmeAI/axme-docs)
-- **SDK improvements** → respective SDK repository
-- **Examples** → [axme-examples](https://github.com/AxmeAI/axme-examples)
-- **Conformance checks** → [axme-conformance](https://github.com/AxmeAI/axme-conformance)
+- **Protocol / schemas** -> [axme-spec](https://github.com/AxmeAI/axme-spec)
+- **Documentation** -> [axme-docs](https://github.com/AxmeAI/axme-docs)
+- **SDK improvements** -> respective SDK repository
+- **Examples** -> [axme-examples](https://github.com/AxmeAI/axme-examples)
+- **Conformance checks** -> [axme-conformance](https://github.com/AxmeAI/axme-conformance)
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+See [CONTRIBUTING.md](CONTRIBUTING.md) - [SECURITY.md](SECURITY.md) - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+</details>
