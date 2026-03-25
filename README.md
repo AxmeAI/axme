@@ -1,21 +1,47 @@
 # AXME
 
-**Durable execution where agents, services, and humans coordinate as equals.**
+Run long-running tasks without polling or webhooks.
 
-Submit once, track lifecycle, complete later. Replace polling, webhook glue, and Temporal complexity with one protocol for all your workflows — AI-driven or not.
+Submit once. Get result later.
+
+```python
+from axme import AxmeClient
+
+client = AxmeClient()
+intent = client.send_intent(to="agent://my-corp/report-service",
+                            intent_type="task.v1",
+                            payload={"data": "generate Q1 report"})
+result = client.wait_for(intent.id)
+```
+
+No polling loops. No webhook endpoints. No custom state orchestration. AXME gives each operation a durable lifecycle with built-in retries, waiting states, delivery tracking, and human approvals.
 
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha/cli)
 
-> **Alpha** — install CLI, log in, run your first example in under 5 minutes.
-> [Quick Start](https://cloud.axme.ai/alpha/cli) · [cloud.axme.ai](https://cloud.axme.ai) · [hello@axme.ai](mailto:hello@axme.ai)
+AXME is a coordination layer for operations that take minutes, hours, or days to complete. An **intent** carries a payload, a delivery target, and a lifecycle policy. The platform drives it to a terminal state through retries, timeouts, reminders, and human approval steps - without external orchestration or polling.
+
+AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an MCP replacement. It is a protocol-based runtime where AI agents, backend services, and human operators participate as equal actors.
+
+> **Alpha** - install CLI, log in, run your first example in under 5 minutes.
+> [Quick Start](https://cloud.axme.ai/alpha/cli) - [cloud.axme.ai](https://cloud.axme.ai) - [hello@axme.ai](mailto:hello@axme.ai)
 
 ---
 
-## What Is AXME?
+## Quick Start
 
-AXME is a coordination layer for operations that take minutes, hours, or days to complete. An **intent** carries a payload, a delivery target, and a lifecycle policy. The platform drives it to a terminal state through retries, timeouts, reminders, and human approval steps — without external orchestration or polling.
+```bash
+# Install the CLI
+curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
+# Open a new terminal, or run the "source" command shown by the installer
 
-AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an MCP replacement. It is a protocol-based runtime where AI agents, backend services, and human operators participate as equal actors.
+# Authenticate
+axme login
+
+# Run a built-in example: human approval via CLI
+axme examples run human/cli
+```
+
+The `human/cli` example deploys a readiness-checker agent and pauses for human approval. You approve or reject directly from the terminal with `axme tasks approve <task_id>`.
 
 ---
 
@@ -76,6 +102,15 @@ No polling. No webhooks. No Redis. No glue code. The platform handles retries, t
 
 ---
 
+## What You Can Build
+
+- **Async APIs** - submit work, get result hours later
+- **Human approval flows** - agent proposes, human approves, workflow continues
+- **AI agent coordination** - multi-agent pipelines with handoffs
+- **Cross-service orchestration** - without state machines or workflow code
+
+---
+
 ## How AXME Compares
 
 | Approach | Lines of code | What you operate |
@@ -96,44 +131,73 @@ No polling. No webhooks. No Redis. No glue code. The platform handles retries, t
 
 ---
 
-## Quick Start
+## Intent Lifecycle
 
-```bash
-# Install the CLI
-curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | sh
-# Open a new terminal, or run the "source" command shown by the installer
-
-# Authenticate
-axme login
-
-# Run a built-in example: human approval via CLI
-axme examples run human/cli
 ```
-
-The `human/cli` example deploys a readiness-checker agent and pauses for human approval. You approve or reject directly from the terminal with `axme tasks approve <task_id>`.
+CREATED -> SUBMITTED -> DELIVERED -> ACKNOWLEDGED -> IN_PROGRESS -> WAITING -> COMPLETED
+                                                                            \-> FAILED
+                                                                            \-> CANCELLED
+                                                                            \-> TIMED_OUT
+```
 
 ---
 
-## Connect Your Agents
+## Delivery Bindings
 
-An agent listens for intents, processes them, and resumes with a result:
+How intents reach agents and services:
 
-```python
-from axme import AxmeClient, AxmeClientConfig
+| Binding | Transport | Use Case |
+|---|---|---|
+| `stream` | SSE (server-sent events) | Real-time agent listeners |
+| `poll` | GET polling | Serverless / cron-based consumers |
+| `http` | Webhook POST | Backend services with an HTTP endpoint |
+| `inbox` | Human inbox | Human-in-the-loop tasks (approve, reject, respond) |
+| `internal` | Platform-internal | Built-in platform steps (reminders, escalations) |
 
-client = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
+---
 
-for delivery in client.listen("agent://myorg/myworkspace/my-agent"):
-    intent = client.get_intent(delivery["intent_id"])
-    result = process(intent["payload"])
-    client.resume_intent(delivery["intent_id"], result)
-```
+## Human Task Types
+
+Four main task types for human participation:
+
+| Type | Purpose |
+|---|---|
+| `approval` | Binary yes/no decision gate (e.g., deploy go/no-go) |
+| `review` | Content or artifact review with comments and verdict |
+| `form` | Structured data collection with custom fields |
+| `manual_action` | Perform a physical or out-of-band action (e.g., flip a switch, sign a document) |
+
+<details>
+<summary>All human task types</summary>
+
+| Type | Purpose |
+|---|---|
+| `approval` | Binary yes/no decision gate (e.g., deploy go/no-go) |
+| `review` | Content or artifact review with comments and verdict |
+| `form` | Structured data collection with custom fields |
+| `manual_action` | Perform a physical or out-of-band action (e.g., flip a switch, sign a document) |
+| `override` | Manual override of an automated decision or threshold |
+| `confirmation` | Acknowledge receipt or verify a fact before proceeding |
+| `assignment` | Route a work item to a specific person or team |
+| `clarification` | Request missing information needed to continue |
+
+</details>
+
+Three paths for human participation:
+
+| Path | How It Works |
+|---|---|
+| **CLI** | `axme tasks list` -> `axme tasks approve <task_id>` |
+| **Email** | Magic link sent to the assigned human; click to approve/reject |
+| **Form** | Custom form submitted via API or embedded UI |
+
+Human steps pause the intent lifecycle. The platform handles reminders and timeouts automatically.
 
 ---
 
 ## ScenarioBundle
 
-A ScenarioBundle is a JSON file that declares agents, human roles, workflow steps, and an intent — everything needed to run a coordination scenario:
+A ScenarioBundle is a JSON file that declares agents, human roles, workflow steps, and an intent - everything needed to run a coordination scenario:
 
 ```json
 {
@@ -170,40 +234,6 @@ axme scenarios apply scenario.json --watch
 
 ---
 
-## MCP — AI Assistant Integration
-
-AXME exposes a full MCP (Model Context Protocol) server at `mcp.cloud.axme.ai`. AI assistants (Claude, ChatGPT, Gemini) can manage the entire platform through 48 tools — the same operations available in the CLI.
-
-```
-POST https://mcp.cloud.axme.ai/mcp
-Authorization: Bearer <account_session_token>
-
-{"jsonrpc": "2.0", "id": 1, "method": "tools/call",
- "params": {"name": "axme.intents_send", "arguments": {
-   "to_agent": "agent://myorg/production/my-agent",
-   "intent_type": "task.process.v1",
-   "payload": {"data": "..."}
- }}}
-```
-
-Available tool groups: status, agents, intents, tasks, organizations, workspaces, members, quota, scenarios, sessions. See [connector setup guides](https://github.com/AxmeAI/axme-docs/tree/main/docs/connectors) for Claude, ChatGPT, and Gemini integration.
-
----
-
-## Delivery Bindings
-
-How intents reach agents and services:
-
-| Binding | Transport | Use Case |
-|---|---|---|
-| `stream` | SSE (server-sent events) | Real-time agent listeners |
-| `poll` | GET polling | Serverless / cron-based consumers |
-| `http` | Webhook POST | Backend services with an HTTP endpoint |
-| `inbox` | Human inbox | Human-in-the-loop tasks (approve, reject, respond) |
-| `internal` | Platform-internal | Built-in platform steps (reminders, escalations) |
-
----
-
 ## Execution Model
 
 ```
@@ -235,32 +265,7 @@ Initiator                        AXME Cloud                      Handler
 
 ---
 
-## Human-in-the-Loop
-
-Three paths for human participation:
-
-| Path | How It Works |
-|---|---|
-| **CLI** | `axme tasks list` → `axme tasks approve <task_id>` |
-| **Email** | Magic link sent to the assigned human; click to approve/reject |
-| **Form** | Custom form submitted via API or embedded UI |
-
-Human steps pause the intent lifecycle. The platform handles reminders and timeouts automatically.
-
-### Human Task Types
-
-| Type | Purpose |
-|---|---|
-| `approval` | Binary yes/no decision gate (e.g., deploy go/no-go) |
-| `form` | Structured data collection with custom fields |
-| `review` | Content or artifact review with comments and verdict |
-| `override` | Manual override of an automated decision or threshold |
-| `confirmation` | Acknowledge receipt or verify a fact before proceeding |
-| `assignment` | Route a work item to a specific person or team |
-| `clarification` | Request missing information needed to continue |
-| `manual_action` | Perform a physical or out-of-band action (e.g., flip a switch, sign a document) |
-
-### Internal Runtime Steps
+## Internal Runtime Steps
 
 These steps run inside the platform - no agent or human action needed:
 
@@ -275,14 +280,60 @@ These steps run inside the platform - no agent or human action needed:
 
 ---
 
-## Intent Lifecycle
+## Connect Your Agents
+
+An agent listens for intents, processes them, and resumes with a result:
+
+```python
+from axme import AxmeClient, AxmeClientConfig
+
+client = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
+
+for delivery in client.listen("agent://myorg/myworkspace/my-agent"):
+    intent = client.get_intent(delivery["intent_id"])
+    result = process(intent["payload"])
+    client.resume_intent(delivery["intent_id"], result)
+```
+
+---
+
+## Agent Addressing
+
+Agents are addressed with a URI scheme:
 
 ```
-CREATED → SUBMITTED → DELIVERED → ACKNOWLEDGED → IN_PROGRESS → WAITING → COMPLETED
-                                                                       ↘ FAILED
-                                                                       ↘ CANCELLED
-                                                                       ↘ TIMED_OUT
+agent://org/workspace/name
 ```
+
+Example: `agent://acme/production/deploy-readiness-checker`
+
+---
+
+## MCP - AI Assistant Integration
+
+AXME exposes a full MCP (Model Context Protocol) server at `mcp.cloud.axme.ai`. AI assistants (Claude, ChatGPT, Gemini) can manage the entire platform through 48 tools - the same operations available in the CLI.
+
+```
+POST https://mcp.cloud.axme.ai/mcp
+Authorization: Bearer <account_session_token>
+
+{"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+ "params": {"name": "axme.intents_send", "arguments": {
+   "to_agent": "agent://myorg/production/my-agent",
+   "intent_type": "task.process.v1",
+   "payload": {"data": "..."}
+ }}}
+```
+
+Available tool groups: status, agents, intents, tasks, organizations, workspaces, members, quota, scenarios, sessions. See [connector setup guides](https://github.com/AxmeAI/axme-docs/tree/main/docs/connectors) for Claude, ChatGPT, and Gemini integration.
+
+---
+
+## AXP - the Intent Protocol
+
+AXP is the open protocol behind AXME. It defines the intent envelope, lifecycle states, delivery semantics, and contract model. AXP can be implemented independently of AXME Cloud - the spec, SDKs, and conformance suite are all public.
+
+Protocol spec: [axme-spec](https://github.com/AxmeAI/axme-spec)
 
 ---
 
@@ -302,12 +353,10 @@ CREATED → SUBMITTED → DELIVERED → ACKNOWLEDGED → IN_PROGRESS → WAITING
 
 ---
 
-## SDKs
+<details>
+<summary><h2>SDKs</h2></summary>
 
 All SDKs implement the same AXP protocol surface. All are currently at **v0.1.2 (Alpha)**.
-
-<details>
-<summary>SDK install commands (Python, TypeScript, Go, Java, .NET)</summary>
 
 | SDK | Package | Install |
 |---|---|---|
@@ -328,37 +377,6 @@ curl -fsSL https://raw.githubusercontent.com/AxmeAI/axme-cli/main/install.sh | s
 
 ---
 
-## AXP — the Intent Protocol
-
-AXP is the open protocol behind AXME. It defines the intent envelope, lifecycle states, delivery semantics, and contract model. AXP can be implemented independently of AXME Cloud — the spec, SDKs, and conformance suite are all public.
-
-Protocol spec: [axme-spec](https://github.com/AxmeAI/axme-spec)
-
----
-
-## Agent Addressing
-
-Agents are addressed with a URI scheme:
-
-```
-agent://org/workspace/name
-```
-
-Example: `agent://acme/production/deploy-readiness-checker`
-
----
-
-## Links
-
-- **Cloud platform**: [cloud.axme.ai](https://cloud.axme.ai)
-- **Quick Start**: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
-- **API docs**: [axme-docs](https://github.com/AxmeAI/axme-docs)
-- **Protocol spec**: [axme-spec](https://github.com/AxmeAI/axme-spec)
-- **Contact**: [hello@axme.ai](mailto:hello@axme.ai)
-- **Security**: [SECURITY.md](SECURITY.md)
-
----
-
 <details>
 <summary><h2>Contributing</h2></summary>
 
@@ -373,3 +391,14 @@ This repository is the entry point - not the implementation. To contribute:
 See [CONTRIBUTING.md](CONTRIBUTING.md) - [SECURITY.md](SECURITY.md) - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 </details>
+
+---
+
+## Links
+
+- **Cloud platform**: [cloud.axme.ai](https://cloud.axme.ai)
+- **Quick Start**: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
+- **API docs**: [axme-docs](https://github.com/AxmeAI/axme-docs)
+- **Protocol spec**: [axme-spec](https://github.com/AxmeAI/axme-spec)
+- **Contact**: [hello@axme.ai](mailto:hello@axme.ai)
+- **Security**: [SECURITY.md](SECURITY.md)
