@@ -5,16 +5,24 @@ Run long-running tasks without polling or webhooks.
 Submit once. Get result later.
 
 ```python
-from axme import AxmeClient
-
-client = AxmeClient()
-intent = client.send_intent(to="agent://my-corp/report-service",
-                            intent_type="task.v1",
-                            payload={"data": "generate Q1 report"})
+intent = client.send_intent({...})
 result = client.wait_for(intent.id)
 ```
 
+```
+$ axme examples run human/cli
+
+  Intent submitted
+  Waiting for approval...
+  Approved
+  Completed
+
+Result: deployment approved
+```
+
 No polling loops. No webhook endpoints. No custom state orchestration. AXME gives each operation a durable lifecycle with built-in retries, waiting states, delivery tracking, and human approvals.
+
+Works with AXME Cloud (managed) or your own agent runtime.
 
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha/cli)
 
