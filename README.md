@@ -19,6 +19,20 @@ AXME is not async RPC. Not a simplified Temporal. Not an agent framework. Not an
 
 ---
 
+## Why Ordinary Async Breaks Down
+
+Every team hits the same walls when coordinating work across services, agents, and people:
+
+- Webhooks fail silently or arrive twice
+- Retry logic gets scattered across services
+- Polling loops add load and hide failures
+- Human approvals break automation chains
+- No shared execution state exists across time
+- Temporal requires determinism constraints and a dedicated platform team
+- Workflow engines add complexity when you need a simple approval gate
+
+---
+
 ## Before and After
 
 **Without AXME** - polling, webhooks, Redis, and glue code:
@@ -59,6 +73,26 @@ result = client.wait_for(intent["id"])  # retries, timeouts, delivery - all hand
 ```
 
 No polling. No webhooks. No Redis. No glue code. The platform handles retries, timeouts, delivery guarantees, and human approval steps for you.
+
+---
+
+## How AXME Compares
+
+| Approach | Lines of code | What you operate |
+|---|---|---|
+| DIY (webhooks + polling + Redis) | ~200 | Everything: retry logic, state machine, timeout jobs, notification service |
+| Temporal | ~80 | Temporal server cluster, workers, determinism constraints |
+| AXME | ~15 | Nothing - managed service with protocol-level guarantees |
+
+---
+
+## Who Uses AXME
+
+**Backend teams:** Approval flows, long-running API orchestration, cross-service coordination, replace polling and webhooks.
+
+**AI agent builders:** Human-in-the-loop that waits hours not minutes, multi-agent workflows with checkpoints, production durability across restarts, framework-agnostic (LangGraph, CrewAI, AutoGen, raw Python).
+
+**Platform teams:** One coordination protocol instead of webhook-polling-queue stack, no runtime lock-in, identity and routing built in, simpler than Temporal.
 
 ---
 
@@ -167,6 +201,38 @@ How intents reach agents and services:
 | `http` | Webhook POST | Backend services with an HTTP endpoint |
 | `inbox` | Human inbox | Human-in-the-loop tasks (approve, reject, respond) |
 | `internal` | Platform-internal | Built-in platform steps (reminders, escalations) |
+
+---
+
+## Execution Model
+
+```
+Initiator (SDK/CLI)                              Handler (your agent)
+       |                                                |
+       |  POST /v1/intents                              |
+       |  ----------------------->  AXME Cloud           |
+       |                           (Gateway + Registry)  |
+       |                                |                |
+       |                                |--- stream (SSE push)
+       |                                |--- poll (agent pulls)
+       |                                |--- http (webhook + HMAC)
+       |                                |--- inbox (human task queue)
+       |                                |--- internal (built-in runtime)
+       |                                |                |
+       |  GET /v1/intents/{id}          |                |
+       |  SSE /v1/intents/{id}/events   |                |
+       |  <-----------------------      |  <-------------|
+       |     lifecycle events           |    resume/result
+```
+
+---
+
+## Reliability Guarantees
+
+- **At-least-once delivery** with ordered lifecycle events and replay support
+- **Idempotency keys** on every write operation - retry-safe by design
+- **Five delivery bindings** - choose the right trade-off per agent
+- **Disconnect and resume** - initiators can go offline, reconnect later, and pick up where they left off
 
 ---
 
