@@ -6,7 +6,7 @@ Submit work once. The platform drives it to completion through crashes, retries,
 
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha/cli) [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE) [![cloud.axme.ai](https://img.shields.io/badge/cloud-cloud.axme.ai-5b21b6)](https://cloud.axme.ai)
 
-**[Quick Start](https://cloud.axme.ai/alpha/cli)** · **[Docs](https://github.com/AxmeAI/axme-docs)** · **[cloud.axme.ai](https://cloud.axme.ai)**
+**[Quick Start](#quick-start)** · **[Docs](https://github.com/AxmeAI/axme-docs)** · **[Examples](https://github.com/AxmeAI/axme-examples)** · **[Spec](https://github.com/AxmeAI/axme-spec)**
 
 ---
 
