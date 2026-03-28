@@ -282,4 +282,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF
 
 ---
 
-**Cloud platform**: [cloud.axme.ai](https://cloud.axme.ai) · **API docs**: [axme-docs](https://github.com/AxmeAI/axme-docs) · **Contact**: [hello@axme.ai](mailto:hello@axme.ai)
+[hello@axme.ai](mailto:hello@axme.ai) · [@axme_ai](https://x.com/axme_ai) · [Security](SECURITY.md) · [License](LICENSE)
