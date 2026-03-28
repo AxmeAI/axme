@@ -8,7 +8,7 @@ This repository (`axme`) is the entry point and overview. Contributions belong i
 
 | Area | Repository |
 |---|---|
-| Protocol and schemas | [axme-spec](https://github.com/AxmeAI/axme-spec) |
+| Protocol and schemas | [axp-spec](https://github.com/AxmeAI/axp-spec) |
 | Documentation and API reference | [axme-docs](https://github.com/AxmeAI/axme-docs) |
 | Python SDK | [axme-sdk-python](https://github.com/AxmeAI/axme-sdk-python) |
 | TypeScript SDK | [axme-sdk-typescript](https://github.com/AxmeAI/axme-sdk-typescript) |

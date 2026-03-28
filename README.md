@@ -6,7 +6,7 @@ Submit work once. The platform drives it to completion through crashes, retries,
 
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha/cli) [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE) [![cloud.axme.ai](https://img.shields.io/badge/cloud-cloud.axme.ai-5b21b6)](https://cloud.axme.ai)
 
-**[Quick Start](#quick-start)** · **[Docs](https://github.com/AxmeAI/axme-docs)** · **[Examples](https://github.com/AxmeAI/axme-examples)** · **[Spec](https://github.com/AxmeAI/axme-spec)**
+**[Quick Start](#quick-start)** · **[Docs](https://github.com/AxmeAI/axme-docs)** · **[Examples](https://github.com/AxmeAI/axme-examples)** · **[Spec](https://github.com/AxmeAI/axp-spec)**
 
 ---
 
@@ -234,7 +234,7 @@ Authorization: Bearer <account_session_token>
 
 AXP is the open protocol behind AXME. It defines the intent envelope, lifecycle states, delivery semantics, and contract model. AXP can be implemented independently of AXME Cloud.
 
-Protocol spec: [axme-spec](https://github.com/AxmeAI/axme-spec)
+Protocol spec: [axp-spec](https://github.com/AxmeAI/axp-spec)
 
 </details>
 
@@ -262,7 +262,7 @@ All SDKs implement the same AXP protocol surface. All are at **v0.1.2 (Alpha)**.
 | **[axme-docs](https://github.com/AxmeAI/axme-docs)** | API reference, integration guides, MCP connector setup |
 | **[axme-examples](https://github.com/AxmeAI/axme-examples)** | Runnable examples across all SDKs |
 | **[axme-cli](https://github.com/AxmeAI/axme-cli)** | CLI - manage intents, agents, scenarios, tasks |
-| **[axme-spec](https://github.com/AxmeAI/axme-spec)** | AXP protocol specification |
+| **[axp-spec](https://github.com/AxmeAI/axp-spec)** | AXP protocol specification |
 | **[axme-conformance](https://github.com/AxmeAI/axme-conformance)** | Conformance test suite |
 
 </details>
@@ -270,7 +270,7 @@ All SDKs implement the same AXP protocol surface. All are at **v0.1.2 (Alpha)**.
 <details>
 <summary><strong>Contributing</strong></summary>
 
-- **Protocol / schemas** - [axme-spec](https://github.com/AxmeAI/axme-spec)
+- **Protocol / schemas** - [axp-spec](https://github.com/AxmeAI/axp-spec)
 - **Documentation** - [axme-docs](https://github.com/AxmeAI/axme-docs)
 - **SDK improvements** - respective SDK repository
 - **Examples** - [axme-examples](https://github.com/AxmeAI/axme-examples)
