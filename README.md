@@ -30,6 +30,7 @@ result = client.wait_for(intent["id"])  # waits hours if needed. survives crashe
 - Webhook retry is everyone's problem - backoff, jitter, DLQ, HMAC, idempotency
 - Multi-agent coordination across machines - most frameworks only work in one process
 - Temporal is overkill for 80% of use cases - cluster, determinism constraints, no built-in HITL
+- Agents in production with zero visibility - no health checks, no cost tracking, no way to stop a misbehaving agent
 
 ## Before and After
 
@@ -83,6 +84,30 @@ Full walkthrough: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
 
 ---
 
+## Agent Mesh - See and Control Your Agents
+
+Every agent you deploy gets real-time monitoring, policy enforcement, and a kill switch.
+
+![Agent Mesh Dashboard](mesh-dashboard.png)
+
+**Dashboard** - all agents on one screen with health, intents, and cost tracking (day/week/month).
+
+**Policies** - restrict which intent types an agent can send or receive, set cost and rate limits, auto-block on breach.
+
+![Policies](mesh-policies.png)
+
+**Kill switch** - isolate a misbehaving agent in one click. All intents blocked instantly. Reversible.
+
+```python
+from axme import AxmeClient, AxmeClientConfig
+
+client = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
+client.mesh.start_heartbeat()  # agent appears in dashboard with live health
+client.mesh.report_metric(success=True, latency_ms=230, cost_usd=0.02)
+```
+
+---
+
 ## How AXME Compares
 
 | | DIY (webhooks + polling) | Temporal | AXME |
@@ -91,6 +116,8 @@ Full walkthrough: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
 | Webhooks | Yes | No | No |
 | Human approvals | Custom build | Possible (heavy) | Built-in (8 task types) |
 | Workflow code | Manual state machine | Required (deterministic) | Not required |
+| Agent monitoring | Custom build | No | Built-in dashboard |
+| Cost controls | No | No | Per-agent policies + kill switch |
 | Setup | Low (but fragile) | High (cluster + workers) | None (managed) |
 | Lines of code | ~200 | ~80 | 4 |
 
