@@ -116,6 +116,8 @@ client.mesh.report_metric(success=True, latency_ms=230, cost_usd=0.02)
 | Webhooks | Yes | No | No |
 | Human approvals | Custom build | Possible (heavy) | Built-in (8 task types) |
 | Workflow code | Manual state machine | Required (deterministic) | Not required |
+| Agent monitoring | Custom build | No | Built-in dashboard |
+| Cost controls | No | No | Per-agent policies + kill switch |
 | Setup | Low (but fragile) | High (cluster + workers) | None (managed) |
 | Lines of code | ~200 | ~80 | 4 |
 
