@@ -88,6 +88,12 @@ Full walkthrough: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
 
 Every agent you deploy gets real-time monitoring, policy enforcement, and a kill switch.
 
+Open the live dashboard at [mesh.axme.ai](https://mesh.axme.ai), or from your terminal:
+
+```bash
+axme mesh dashboard
+```
+
 ![Agent Mesh Dashboard](mesh-dashboard.png)
 
 **Dashboard** - all agents on one screen with health, intents, and cost tracking (day/week/month).
