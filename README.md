@@ -30,6 +30,33 @@ result = client.wait_for(intent["id"])  # waits hours if needed. survives crashe
 - Webhook retry is everyone's problem - backoff, jitter, DLQ, HMAC, idempotency
 - Multi-agent coordination across machines - most frameworks only work in one process
 - Temporal is overkill for 80% of use cases - cluster, determinism constraints, no built-in HITL
+- You have agents in production but can't see them - no health checks, no cost tracking, no way to stop one in 3 seconds
+
+---
+
+## Agent Mesh - See and Control Your Agents
+
+Every agent you deploy gets real-time monitoring, policy enforcement, and a kill switch.
+
+![Agent Mesh Dashboard](mesh-dashboard.png)
+
+**Dashboard** - all agents on one screen with health, intents, and cost tracking (day/week/month).
+
+**Policies** - restrict which intent types an agent can send or receive, set cost and rate limits, auto-block on breach.
+
+![Policies](mesh-policies.png)
+
+**Kill switch** - isolate a misbehaving agent in one click. All intents blocked instantly. Reversible.
+
+```python
+from axme import AxmeClient, AxmeClientConfig
+
+client = AxmeClient(AxmeClientConfig(api_key="axme_sa_..."))
+client.mesh.start_heartbeat()  # agent appears in dashboard with live health
+client.mesh.report_metric(success=True, latency_ms=230, cost_usd=0.02)
+```
+
+---
 
 ## Before and After
 
