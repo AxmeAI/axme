@@ -1,8 +1,8 @@
 # AXME
 
-**Durable execution for AI agents and services.**
+**Durable execution for AI agents and services - workflow orchestration with built-in human approval gates, agent crash recovery, and multi-agent orchestration. No cluster required.**
 
-Submit work once. The platform drives it to completion through crashes, retries, timeouts, and human approval steps.
+Submit work once. AXME drives it to completion through crashes, retries, timeouts, and human-in-the-loop steps. A managed Temporal alternative with durable execution without cluster setup, an agent kill switch, and an agent monitoring dashboard out of the box.
 
 [![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://cloud.axme.ai/alpha/cli) [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE) [![cloud.axme.ai](https://img.shields.io/badge/cloud-cloud.axme.ai-5b21b6)](https://cloud.axme.ai)
 
@@ -23,14 +23,14 @@ result = client.wait_for(intent["id"])  # waits hours if needed. survives crashe
 
 ---
 
-## The Problem
+## Why AXME?
 
-- AI agents block forever waiting for human approval - no reminders, no escalation, session dies
-- Agent crashes mid-task - state is gone, start over from scratch
-- Webhook retry is everyone's problem - backoff, jitter, DLQ, HMAC, idempotency
-- Multi-agent coordination across machines - most frameworks only work in one process
-- Temporal is overkill for 80% of use cases - cluster, determinism constraints, no built-in HITL
-- Agents in production with zero visibility - no health checks, no cost tracking, no way to stop a misbehaving agent
+- **Human approval gates that survive for hours** - AI agents block forever waiting for human approval - no reminders, no escalation, session dies. AXME provides built-in human-in-the-loop task types that wait as long as needed.
+- **AI agent crash recovery** - agent crashes mid-task - state is gone, start over from scratch. AXME preserves intent state across restarts so work resumes, not restarts.
+- **Webhook retry is everyone's problem** - backoff, jitter, DLQ, HMAC, idempotency. AXME handles delivery guarantees so you don't.
+- **Multi-agent orchestration across machines** - most frameworks only work in one process. AXME provides an agent coordination protocol that works across services, languages, and clouds.
+- **Temporal alternative without the overhead** - Temporal is overkill for 80% of use cases - cluster, determinism constraints, no built-in HITL. AXME gives you durable execution without cluster setup.
+- **Agent monitoring dashboard and kill switch** - agents in production with zero visibility - no health checks, no cost tracking, no way to stop a misbehaving agent. AXME includes a real-time agent monitoring dashboard and an agent kill switch out of the box.
 
 ## Before and After
 
@@ -84,9 +84,9 @@ Full walkthrough: [cloud.axme.ai/alpha/cli](https://cloud.axme.ai/alpha/cli)
 
 ---
 
-## Agent Mesh - See and Control Your Agents
+## Agent Monitoring Dashboard - See and Control Your Agents
 
-Every agent you deploy gets real-time monitoring, policy enforcement, and a kill switch.
+Every agent you deploy gets a real-time agent monitoring dashboard, policy enforcement, and an agent kill switch.
 
 Open the live dashboard at [mesh.axme.ai](https://mesh.axme.ai), or from your terminal:
 
@@ -114,28 +114,31 @@ client.mesh.report_metric(success=True, latency_ms=230, cost_usd=0.02)
 
 ---
 
-## How AXME Compares
+## AXME vs Temporal vs Inngest
 
-| | DIY (webhooks + polling) | Temporal | AXME |
-|---|---|---|---|
-| Polling | Yes | No | No |
-| Webhooks | Yes | No | No |
-| Human approvals | Custom build | Possible (heavy) | Built-in (8 task types) |
-| Workflow code | Manual state machine | Required (deterministic) | Not required |
-| Agent monitoring | Custom build | No | Built-in dashboard |
-| Cost controls | No | No | Per-agent policies + kill switch |
-| Setup | Low (but fragile) | High (cluster + workers) | None (managed) |
-| Lines of code | ~200 | ~80 | 4 |
+| | DIY (webhooks + polling) | Temporal | Inngest | AXME |
+|---|---|---|---|---|
+| Polling | Yes | No | No | No |
+| Webhooks | Yes | No | Yes (event-driven) | No |
+| Human approval gates | Custom build | Possible (heavy) | No | Built-in (8 task types) |
+| Workflow orchestration | Manual state machine | Required (deterministic) | Step functions | Not required |
+| Agent monitoring dashboard | Custom build | No | No | Built-in |
+| Agent kill switch | No | No | No | One-click isolate |
+| AI agent crash recovery | No | Replay-based | Retry-based | Intent-state durable |
+| Multi-agent orchestration | No | Possible (complex) | No | Native agent coordination protocol |
+| Human in the loop | No | External | No | 8 built-in task types |
+| Setup | Low (but fragile) | High (cluster + workers) | Medium (functions) | None (managed) |
+| Lines of code | ~200 | ~80 | ~40 | 4 |
 
 ---
 
 ## What You Can Build
 
-**Backend teams** - approval flows, long-running API orchestration, replace polling and webhooks.
+**Backend teams** - workflow orchestration for approval flows, long-running API coordination, replace polling and webhooks.
 
-**AI agent builders** - human-in-the-loop that waits hours not minutes, multi-agent pipelines with handoffs, production durability across restarts, framework-agnostic (LangGraph, CrewAI, AutoGen, raw Python).
+**AI agent builders** - human-in-the-loop approvals that wait hours not minutes, multi-agent orchestration with handoffs across services, AI agent crash recovery across restarts, framework-agnostic (LangGraph, CrewAI, AutoGen, raw Python).
 
-**Platform teams** - one coordination protocol instead of webhook-polling-queue stack, simpler than Temporal.
+**Platform teams** - one agent coordination protocol instead of webhook-polling-queue stack, a Temporal alternative that ships in minutes.
 
 ---
 
@@ -312,6 +315,12 @@ All SDKs implement the same AXP protocol surface. All are at **v0.1.2 (Alpha)**.
 See [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 </details>
+
+---
+
+## Topics
+
+`durable-execution` `workflow-orchestration` `temporal-alternative` `human-in-the-loop` `human-approval-gates` `ai-agent-crash-recovery` `agent-kill-switch` `agent-monitoring-dashboard` `multi-agent-orchestration` `agent-coordination-protocol` `durable-execution-without-cluster` `ai-agents` `hitl` `intent-protocol` `agentic-workflows`
 
 ---
 
