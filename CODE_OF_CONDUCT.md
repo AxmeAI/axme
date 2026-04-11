@@ -19,7 +19,7 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to [hello@axme.ai](mailto:hello@axme.ai).
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to [contact@axme.ai](mailto:contact@axme.ai).
 
 ## Attribution
 

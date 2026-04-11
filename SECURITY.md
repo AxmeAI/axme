@@ -4,7 +4,7 @@
 
 Please do **not** open a public GitHub issue for security vulnerabilities.
 
-Email: **[hello@axme.ai](mailto:hello@axme.ai)** with subject line `[SECURITY]`.
+Email: **[contact@axme.ai](mailto:contact@axme.ai)** with subject line `[SECURITY]`.
 
 We will acknowledge receipt within 48 hours and provide a resolution timeline within 5 business days.
 
