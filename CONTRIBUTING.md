@@ -28,4 +28,4 @@ This repository (`axme`) is the entry point and overview. Contributions belong i
 
 ## Contact
 
-Questions and suggestions: [hello@axme.ai](mailto:hello@axme.ai)
+Questions and suggestions: [contact@axme.ai](mailto:contact@axme.ai)
